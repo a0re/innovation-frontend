@@ -9,7 +9,12 @@ import { Progress } from './ui/progress';
 import { Separator } from './ui/separator';
 import { api } from '../lib/api';
 import type { MultiModelPrediction, StatsResponse, ClusterInfoResponse } from '../lib/api';
-import { AlertCircle, CheckCircle2, Activity, BarChart3, Layers, Sparkles } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Activity, BarChart3, Layers, Sparkles, TrendingUp, Zap, LineChart, FlaskConical, Database } from 'lucide-react';
+import { EnhancedCharts } from './EnhancedCharts';
+import { QuickWinsPage } from './QuickWinsPage';
+import { ProfessionalAnalytics } from './ProfessionalAnalytics';
+import { ExperimentalCharts } from './ExperimentalCharts';
+import { generateSamplePredictions, generateSampleStats, generateSampleClusterInfo } from '../lib/sampleData';
 
 export function ComprehensiveDemo() {
   const [message, setMessage] = useState('');
@@ -19,6 +24,7 @@ export function ComprehensiveDemo() {
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [clusterInfo, setClusterInfo] = useState<ClusterInfoResponse | null>(null);
   const [examples, setExamples] = useState<{ spam: string[]; not_spam: string[] } | null>(null);
+  const [predictionHistory, setPredictionHistory] = useState<MultiModelPrediction[]>([]);
 
   // Load initial data
   useEffect(() => {
@@ -62,6 +68,7 @@ export function ComprehensiveDemo() {
     try {
       const result = await api.predictMultiModel(message);
       setPrediction(result);
+      setPredictionHistory(prev => [...prev, result]); // Add to history
       await loadStats(); // Refresh stats after prediction
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Prediction failed');
@@ -81,13 +88,43 @@ export function ComprehensiveDemo() {
     setError(null);
   };
 
+  const loadSampleData = () => {
+    // Generate 30 sample predictions
+    const samplePreds = generateSamplePredictions(30);
+    setPredictionHistory(samplePreds);
+
+    // Load sample stats
+    const sampleStats = generateSampleStats();
+    setStats(sampleStats);
+
+    // Load sample cluster info
+    const sampleClusterInfo = generateSampleClusterInfo();
+    setClusterInfo(sampleClusterInfo);
+
+    // Set the latest prediction as current
+    setPrediction(samplePreds[samplePreds.length - 1]);
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Spam Detection API Demo</h1>
-        <p className="text-muted-foreground">
-          Test multi-model predictions, clustering analysis, and view real-time statistics
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Spam Detection API Demo</h1>
+            <p className="text-muted-foreground">
+              Test multi-model predictions, clustering analysis, and view real-time statistics
+            </p>
+          </div>
+          <Button
+            onClick={loadSampleData}
+            variant="outline"
+            size="lg"
+            className="gap-2"
+          >
+            <Database className="w-5 h-5" />
+            Load Sample Data
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
@@ -129,10 +166,26 @@ export function ComprehensiveDemo() {
       </div>
 
       <Tabs defaultValue="predict" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="predict">
             <Sparkles className="w-4 h-4 mr-2" />
             Predict
+          </TabsTrigger>
+          <TabsTrigger value="insights">
+            <Zap className="w-4 h-4 mr-2" />
+            Insights
+          </TabsTrigger>
+          <TabsTrigger value="analytics">
+            <LineChart className="w-4 h-4 mr-2" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="experimental">
+            <FlaskConical className="w-4 h-4 mr-2" />
+            Experimental
+          </TabsTrigger>
+          <TabsTrigger value="charts">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            Charts
           </TabsTrigger>
           <TabsTrigger value="models">
             <Layers className="w-4 h-4 mr-2" />
@@ -264,6 +317,30 @@ export function ComprehensiveDemo() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Quick Insights Tab (Option A) */}
+        <TabsContent value="insights">
+          <QuickWinsPage stats={stats} predictions={predictionHistory} />
+        </TabsContent>
+
+        {/* Professional Analytics Tab (Option B) */}
+        <TabsContent value="analytics">
+          <ProfessionalAnalytics
+            stats={stats}
+            predictions={predictionHistory}
+            clusterInfo={clusterInfo}
+          />
+        </TabsContent>
+
+        {/* Experimental Charts Tab */}
+        <TabsContent value="experimental">
+          <ExperimentalCharts stats={stats} predictions={predictionHistory} />
+        </TabsContent>
+
+        {/* Charts Tab */}
+        <TabsContent value="charts">
+          <EnhancedCharts stats={stats} predictions={predictionHistory} />
         </TabsContent>
 
         {/* Models Tab */}
