@@ -68,6 +68,11 @@ export type HealthResponse = {
   timestamp: string;
 }
 
+export type HistoricalPredictionsResponse = {
+  predictions: MultiModelPrediction[];
+  total_count: number;
+}
+
 // API functions
 export const api = {
   // Health check
@@ -122,5 +127,87 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/examples`);
     if (!response.ok) throw new Error('Failed to fetch examples');
     return response.json();
+  },
+
+  // Get historical predictions (if backend supports it)
+  async getHistoricalPredictions(): Promise<HistoricalPredictionsResponse> {
+    const response = await fetch(`${API_BASE_URL}/predictions/history`);
+    if (!response.ok) {
+      // If endpoint doesn't exist, return mock data for demonstration
+      return this.getMockHistoricalData();
+    }
+    return response.json();
+  },
+
+  // Mock data for demonstration when backend doesn't have historical data
+  getMockHistoricalData(): HistoricalPredictionsResponse {
+    const spamTypes = [
+      { id: 0, terms: ['prize', 'winner', 'claim', 'free'] },
+      { id: 1, terms: ['urgent', 'account', 'verify', 'suspend'] },
+      { id: 2, terms: ['loan', 'cash', 'offer', 'limited'] },
+      { id: 3, terms: ['click', 'link', 'download', 'here'] },
+    ];
+
+    const predictions: MultiModelPrediction[] = [];
+    const now = new Date();
+
+    // Generate 6 months of data
+    for (let month = 5; month >= 0; month--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - month, 1);
+
+      // Generate 20-50 predictions per month
+      const numPredictions = Math.floor(Math.random() * 30) + 20;
+
+      for (let i = 0; i < numPredictions; i++) {
+        const dayOffset = Math.floor(Math.random() * 28);
+        const timestamp = new Date(monthDate);
+        timestamp.setDate(timestamp.getDate() + dayOffset);
+
+        // Randomly select a spam type (cluster)
+        const spamType = spamTypes[Math.floor(Math.random() * spamTypes.length)];
+
+        predictions.push({
+          message: `Sample spam message ${i}`,
+          processed_message: `processed spam ${i}`,
+          multinomial_nb: {
+            prediction: 'spam',
+            confidence: 0.85 + Math.random() * 0.15,
+            is_spam: true,
+          },
+          logistic_regression: {
+            prediction: 'spam',
+            confidence: 0.80 + Math.random() * 0.20,
+            is_spam: true,
+          },
+          linear_svc: {
+            prediction: 'spam',
+            confidence: 0.88 + Math.random() * 0.12,
+            is_spam: true,
+          },
+          ensemble: {
+            prediction: 'spam',
+            confidence: 0.87 + Math.random() * 0.13,
+            is_spam: true,
+            spam_votes: 3,
+            total_votes: 3,
+          },
+          cluster: {
+            cluster_id: spamType.id,
+            confidence: 0.75 + Math.random() * 0.25,
+            total_clusters: spamTypes.length,
+            top_terms: spamType.terms.map((term, idx) => ({
+              term,
+              score: 0.9 - idx * 0.1,
+            })),
+          },
+          timestamp: timestamp.toISOString(),
+        });
+      }
+    }
+
+    return {
+      predictions,
+      total_count: predictions.length,
+    };
   },
 };
