@@ -3,6 +3,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { AlertTriangle } from "lucide-react"
 import { Link } from "react-router-dom"
 
+/**
+ * Not Found (404) page component
+ */
 export function NotFound() {
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-2xl">
@@ -19,7 +22,7 @@ export function NotFound() {
               <Link to="/">Go Home</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/dashboard">View Dashboard</Link>
+              <Link to="/model-test">Test Model</Link>
             </Button>
           </div>
         </CardContent>
