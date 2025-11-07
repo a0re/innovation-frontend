@@ -1,5 +1,5 @@
 import { format, parseISO } from 'date-fns';
-import type { MultiModelPrediction } from './api';
+import type { MultiModelPrediction, TopTerm } from '@/types';
 
 export type MonthlySpamType = {
   month: string; // e.g., "Jan 2024"
@@ -35,7 +35,7 @@ export function aggregateMonthlySpamTypes(
     if (!monthMap.has(clusterId)) {
       monthMap.set(clusterId, {
         count: 0,
-        terms: pred.cluster.top_terms.slice(0, 3).map((t) => t.term),
+  terms: pred.cluster.top_terms.slice(0, 3).map((t: TopTerm) => t.term),
       });
     }
 

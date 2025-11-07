@@ -1,10 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { ComprehensiveDemo } from './components/ComprehensiveDemo'
-import { ModelTest } from './pages/ModelTest'
-import { Dashboard } from './pages/Dashboard'
-import { NotFound } from './pages/NotFound'
-import { Navigation } from './components/Navigation'
-
+import { Navigation } from '@/components/layout'
+import { routes } from '@/config/routes'
 
 function App() {
   return (
@@ -12,10 +8,13 @@ function App() {
       <div className="min-h-screen bg-background">
         <Navigation />
         <Routes>
-          <Route path="/" element={<ComprehensiveDemo />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/model-test" element={<ModelTest />} />
-          <Route path="*" element={<NotFound />} />
+          {routes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={<route.element />}
+            />
+          ))}
         </Routes>
       </div>
     </BrowserRouter>
