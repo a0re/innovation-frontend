@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 import {
   BarChart3,
   Shield,
@@ -12,40 +13,51 @@ import {
   Layers,
   LineChart as LineChartIcon
 } from "lucide-react"
-import { api } from "@/lib/api"
+import { api, type StatsResponse, type ClusterInfoResponse } from "@/lib/api"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { aggregateMonthlySpamTypes, type MonthlySpamType } from "@/lib/monthlySpamAggregation"
+import { formatNumber, formatConfidence } from "@/lib/utils"
+
+type ExamplesResponse = {
+  spam: string[];
+  not_spam: string[];
+}
 
 export function Dashboard() {
-  const [stats, setStats] = useState<any>(null)
-  const [clusterInfo, setClusterInfo] = useState<any>(null)
-  const [examples, setExamples] = useState<any>(null)
+  const [stats, setStats] = useState<StatsResponse | null>(null)
+  const [clusterInfo, setClusterInfo] = useState<ClusterInfoResponse | null>(null)
+  const [examples, setExamples] = useState<ExamplesResponse | null>(null)
   const [monthlySpamData, setMonthlySpamData] = useState<MonthlySpamType[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [statsData, clusterData, examplesData, historicalData] = await Promise.all([
+        api.getStats(),
+        api.getClusterInfo(),
+        api.getExamples(),
+        api.getHistoricalPredictions()
+      ])
+      setStats(statsData)
+      setClusterInfo(clusterData)
+      setExamples(examplesData)
+
+      // Aggregate monthly spam type data
+      const monthlyData = aggregateMonthlySpamTypes(historicalData.predictions)
+      setMonthlySpamData(monthlyData)
+      setError(null)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch dashboard data"
+      setError(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsData, clusterData, examplesData, historicalData] = await Promise.all([
-          api.getStats(),
-          api.getClusterInfo(),
-          api.getExamples(),
-          api.getHistoricalPredictions()
-        ])
-        setStats(statsData)
-        setClusterInfo(clusterData)
-        setExamples(examplesData)
-
-        // Aggregate monthly spam type data
-        const monthlyData = aggregateMonthlySpamTypes(historicalData.predictions)
-        setMonthlySpamData(monthlyData)
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchData()
   }, [])
 
@@ -72,25 +84,63 @@ export function Dashboard() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
+        <Card className="border-destructive">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Error Loading Dashboard
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={fetchData} variant="default">
+              Retry
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   const spamRate = stats ? (stats.spam_detected / stats.total_predictions) * 100 : 0
   const notSpamRate = stats ? (stats.not_spam_detected / stats.total_predictions) * 100 : 0
+  const hasData = stats && stats.total_predictions > 0
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-7xl">
+    <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Real-time spam detection analytics and insights</p>
       </div>
 
+      {/* Empty State */}
+      {!hasData && (
+        <Card className="mb-6">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <BarChart3 className="h-16 w-16 text-muted-foreground mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No Data Yet</h3>
+            <p className="text-muted-foreground text-center max-w-md mb-4">
+              Start testing messages to see analytics and insights appear here.
+            </p>
+            <Button asChild>
+              <a href="/model-test">Test Your First Message</a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Predictions</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.total_predictions || 0}</div>
+            <div className="text-2xl font-bold">{formatNumber(stats?.total_predictions || 0)}</div>
             <p className="text-xs text-muted-foreground mt-1">
               All-time messages analyzed
             </p>
@@ -113,10 +163,10 @@ export function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Not Spam</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-500">
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {stats?.not_spam_detected || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -132,7 +182,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.average_confidence ? (stats.average_confidence * 100).toFixed(1) : 0}%
+              {stats?.average_confidence ? formatConfidence(stats.average_confidence) : "0%"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Model certainty score
@@ -173,7 +223,7 @@ export function Dashboard() {
                 </div>
                 <div className="h-3 rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full bg-green-500 rounded-full transition-all"
+                    className="h-full bg-emerald-500 dark:bg-emerald-400 rounded-full transition-all"
                     style={{ width: `${notSpamRate}%` }}
                   />
                 </div>
@@ -242,7 +292,7 @@ export function Dashboard() {
               <div className="pt-2">
                 <div className="text-sm font-medium mb-3">Cluster Distribution</div>
                 <div className="space-y-2">
-                  {clusterInfo?.clusters?.map((cluster: any, idx: number) => (
+                  {clusterInfo?.clusters?.map((cluster, idx) => (
                     <div key={idx} className="p-3 rounded-md bg-muted">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">Cluster {cluster.cluster_id}</span>
@@ -251,7 +301,7 @@ export function Dashboard() {
                         </Badge>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {cluster.top_terms.slice(0, 4).map((term: any, termIdx: number) => (
+                        {cluster.top_terms.slice(0, 4).map((term, termIdx) => (
                           <Badge key={termIdx} variant="secondary" className="text-xs">
                             {term.term}
                           </Badge>
@@ -278,7 +328,7 @@ export function Dashboard() {
         <CardContent>
           {monthlySpamData.length > 0 ? (
             <>
-              <div className="h-[300px] w-full">
+              <div className="h-[200px] md:h-[300px] lg:h-[400px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={monthlySpamData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -388,7 +438,7 @@ export function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <CheckCircle2 className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
               Not Spam Examples
             </CardTitle>
             <CardDescription>Sample messages classified as legitimate</CardDescription>
@@ -396,7 +446,7 @@ export function Dashboard() {
           <CardContent>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {examples?.not_spam?.slice(0, 8).map((message: string, idx: number) => (
-                <div key={idx} className="p-3 rounded-md bg-green-500/10 border border-green-500/20">
+                <div key={idx} className="p-3 rounded-md bg-emerald-500/10 border border-emerald-500/20 dark:bg-emerald-500/20">
                   <p className="text-sm line-clamp-2">{message}</p>
                 </div>
               ))}

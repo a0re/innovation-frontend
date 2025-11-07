@@ -5,15 +5,18 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Loader2, Brain, Send, Settings } from "lucide-react"
-import { api } from "@/lib/api"
+import { Loader2, Brain, Send, Settings, AlertTriangle } from "lucide-react"
+import { api, type MultiModelPrediction, type BatchPredictionResponse } from "@/lib/api"
 
 export function ModelTest() {
   const [message, setMessage] = useState("")
   const [batchMessages, setBatchMessages] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
-  const [batchResult, setBatchResult] = useState<any>(null)
+  const [singleLoading, setSingleLoading] = useState(false)
+  const [batchLoading, setBatchLoading] = useState(false)
+  const [result, setResult] = useState<MultiModelPrediction | null>(null)
+  const [batchResult, setBatchResult] = useState<BatchPredictionResponse | null>(null)
+  const [singleError, setSingleError] = useState<string | null>(null)
+  const [batchError, setBatchError] = useState<string | null>(null)
 
   // Model toggles
   const [enableMultinomialNB, setEnableMultinomialNB] = useState(true)
@@ -23,15 +26,17 @@ export function ModelTest() {
   const handleSingleTest = async () => {
     if (!message.trim()) return
 
-    setLoading(true)
+    setSingleLoading(true)
     setResult(null)
+    setSingleError(null)
     try {
       const data = await api.predictMultiModel(message)
       setResult(data)
-    } catch (error) {
-      console.error("Prediction failed:", error)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Prediction failed"
+      setSingleError(errorMessage)
     } finally {
-      setLoading(false)
+      setSingleLoading(false)
     }
   }
 
@@ -43,22 +48,24 @@ export function ModelTest() {
 
     if (messages.length === 0) return
 
-    setLoading(true)
+    setBatchLoading(true)
     setBatchResult(null)
+    setBatchError(null)
     try {
       const data = await api.predictBatchMultiModel(messages)
       setBatchResult(data)
-    } catch (error) {
-      console.error("Batch prediction failed:", error)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Batch prediction failed"
+      setBatchError(errorMessage)
     } finally {
-      setLoading(false)
+      setBatchLoading(false)
     }
   }
 
   const enabledModelsCount = [enableMultinomialNB, enableLogisticRegression, enableLinearSVC].filter(Boolean).length
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 md:px-6 py-8 max-w-6xl">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Model Testing</h1>
         <p className="text-muted-foreground">Test spam detection models with custom messages</p>
@@ -130,7 +137,17 @@ export function ModelTest() {
             <CardDescription>Test a single message against all models</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {singleError && (
+              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  {singleError}
+                </p>
+              </div>
+            )}
+            <Label htmlFor="single-message">Message</Label>
             <Textarea
+              id="single-message"
               placeholder="Enter a message to test..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -139,10 +156,10 @@ export function ModelTest() {
             />
             <Button
               onClick={handleSingleTest}
-              disabled={loading || !message.trim()}
+              disabled={singleLoading || !message.trim()}
               className="w-full"
             >
-              {loading ? (
+              {singleLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Testing...
@@ -221,7 +238,17 @@ export function ModelTest() {
             <CardDescription>Test multiple messages (one per line)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {batchError && (
+              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  {batchError}
+                </p>
+              </div>
+            )}
+            <Label htmlFor="batch-messages">Messages (one per line)</Label>
             <Textarea
+              id="batch-messages"
               placeholder="Enter messages (one per line)..."
               value={batchMessages}
               onChange={(e) => setBatchMessages(e.target.value)}
@@ -230,10 +257,10 @@ export function ModelTest() {
             />
             <Button
               onClick={handleBatchTest}
-              disabled={loading || !batchMessages.trim()}
+              disabled={batchLoading || !batchMessages.trim()}
               className="w-full"
             >
-              {loading ? (
+              {batchLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Testing...
@@ -260,7 +287,7 @@ export function ModelTest() {
                 </div>
 
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {batchResult.predictions.map((pred: any, idx: number) => (
+                  {batchResult.predictions.map((pred, idx) => (
                     <div key={idx} className="text-sm p-2 rounded-md bg-muted space-y-1">
                       <div className="flex items-start justify-between gap-2">
                         <span className="text-xs text-muted-foreground line-clamp-1 flex-1">

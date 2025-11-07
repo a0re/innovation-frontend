@@ -81,10 +81,3 @@ export function aggregateMonthlySpamTypes(
 
   return result;
 }
-
-/**
- * Get a label for a spam type based on its cluster ID and top terms
- */
-export function getSpamTypeLabel(clusterId: number, topTerms: string[]): string {
-  return `Type ${clusterId}: ${topTerms.slice(0, 2).join(', ')}`;
-}
