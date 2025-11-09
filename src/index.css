@@ -1,103 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Custom variant for dark mode */
 @custom-variant dark (&:is(.dark *));
 
-/* =========================
-   Root Variables - Light Mode
-   ========================= */
 :root {
-  --radius: 0.625rem;
-
-  /* Colors */
-  --background: oklch(0.985 0.002 255);
-  --foreground: oklch(0.20 0.01 255);
-
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.01 255);
-
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.01 255);
-
-  --primary: oklch(0.58 0.12 255);
-  --primary-foreground: oklch(0.98 0.005 255);
-
-  --secondary: oklch(0.95 0.005 255);
-  --secondary-foreground: oklch(0.28 0.015 255);
-
-  --muted: oklch(0.93 0.01 255);
-  --muted-foreground: oklch(0.55 0.02 255);
-
-  --accent: oklch(0.96 0.005 255);
-  --accent-foreground: oklch(0.20 0.01 255);
-
-  --destructive: oklch(0.62 0.23 28);
-  --destructive-foreground: oklch(0.98 0.01 255);
-
-  --border: oklch(0.90 0.007 255);
-  --input: oklch(0.92 0.007 255);
-  --ring: oklch(0.60 0.12 255);
-
-  /* Chart Colors */
-  --chart-1: oklch(0.62 0.18 255);
-  --chart-2: oklch(0.65 0.15 200);
-  --chart-3: oklch(0.78 0.15 70);
-  --chart-4: oklch(0.65 0.20 300);
-  --chart-5: oklch(0.60 0.22 25);
-
-  /* Sidebar */
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.20 0.01 255);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--accent);
-  --sidebar-accent-foreground: var(--accent-foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
-}
-
-/* =========================
-   Dark Mode Variables
-   ========================= */
-.dark {
-  --background: oklch(0.18 0.01 255);
-  --foreground: oklch(0.97 0.005 255);
-
-  --card: oklch(0.22 0.01 255);
+  color-scheme: light;
+  --radius: 0.875rem;
+  --background: #f5f7fb;
+  --foreground: #1a2336;
+  --card: #ffffff;
   --card-foreground: var(--foreground);
-
-  --popover: oklch(0.22 0.01 255);
+  --popover: #ffffff;
   --popover-foreground: var(--foreground);
-
-  --primary: oklch(0.72 0.13 255);
-  --primary-foreground: oklch(0.13 0.01 255);
-
-  --secondary: oklch(0.28 0.01 255);
-  --secondary-foreground: var(--foreground);
-
-  --muted: oklch(0.26 0.01 255);
-  --muted-foreground: oklch(0.70 0.02 255);
-
-  --accent: oklch(0.30 0.01 255);
-  --accent-foreground: var(--foreground);
-
-  --destructive: oklch(0.58 0.20 25);
-  --destructive-foreground: var(--foreground);
-
-  --border: oklch(0.25 0.01 255 / 0.5);
-  --input: oklch(0.28 0.01 255 / 0.6);
-  --ring: oklch(0.72 0.13 255);
-
-  /* Chart Colors */
-  --chart-1: oklch(0.65 0.18 255);
-  --chart-2: oklch(0.70 0.15 180);
-  --chart-3: oklch(0.78 0.15 70);
-  --chart-4: oklch(0.65 0.20 300);
-  --chart-5: oklch(0.60 0.22 25);
-
-  /* Sidebar */
-  --sidebar: oklch(0.22 0.01 255);
+  --primary: #2a4d87;
+  --primary-foreground: #f7f9ff;
+  --secondary: #e5ecff;
+  --secondary-foreground: #213250;
+  --muted: #e7ebf5;
+  --muted-foreground: #53617c;
+  --accent: #dbe7ff;
+  --accent-foreground: #213250;
+  --destructive: #d64550;
+  --destructive-foreground: #fff5f5;
+  --border: #cfd6e6;
+  --input: #cfd6e6;
+  --ring: #385aa9;
+  --chart-1: #2a4d87;
+  --chart-2: #3f76d6;
+  --chart-3: #4f9d69;
+  --chart-4: #f4a259;
+  --chart-5: #c77dff;
+  --chart-6: #b23a48;
+  --sidebar: #ffffff;
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
@@ -107,29 +42,48 @@
   --sidebar-ring: var(--ring);
 }
 
-/* Light-mode overrides if system prefers */
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.dark {
+  color-scheme: dark;
+  --background: #0f1728;
+  --foreground: #e6ecf8;
+  --card: #131d2f;
+  --card-foreground: var(--foreground);
+  --popover: #131d2f;
+  --popover-foreground: var(--foreground);
+  --primary: #718bff;
+  --primary-foreground: #0b1221;
+  --secondary: #1c2941;
+  --secondary-foreground: var(--foreground);
+  --muted: #1a2539;
+  --muted-foreground: #9aa7c6;
+  --accent: #1e3154;
+  --accent-foreground: var(--foreground);
+  --destructive: #ff7b85;
+  --destructive-foreground: #0b1221;
+  --border: rgba(103, 124, 164, 0.45);
+  --input: rgba(103, 124, 164, 0.5);
+  --ring: #8198ff;
+  --chart-1: #8198ff;
+  --chart-2: #5ec4ff;
+  --chart-3: #5fbf90;
+  --chart-4: #f6b980;
+  --chart-5: #c9a4ff;
+  --chart-6: #ff8ba0;
+  --sidebar: #131d2f;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
-/* =========================
-   Shadcn / Tailwind Integration
-   ========================= */
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -145,6 +99,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -153,6 +108,7 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -163,12 +119,24 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Tailwind base layer for borders, focus, and background */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    @apply bg-background text-foreground antialiased text-base;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: -0.015em;
+  }
+  p {
+    @apply leading-relaxed;
   }
 }
