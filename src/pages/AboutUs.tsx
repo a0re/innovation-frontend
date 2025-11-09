@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PageHeader } from "@/components/common"
+import { PageHeader } from "@/components/common/PageHeader"
 import {
   Shield,
   Target,
@@ -30,10 +30,10 @@ export function AboutUs() {
         </CardHeader>
         <CardContent>
           <p className="text-lg leading-relaxed">
-            At SpamGuard AI, we're dedicated to creating a safer, cleaner digital
-            communication environment. Using cutting-edge machine learning technology,
-            we empower users and organizations to detect and filter spam messages with
-            unprecedented accuracy and efficiency.
+            At AI4Cyber we bring together the security, data, and engineering work completed across
+            Innovation Project assignments into a single, production-style platform. The solution couples
+            a FastAPI backend, a React + Vite front-end, and scikit-learn models to provide explainable
+            spam detection with real-time analytics so teams can keep inboxes clean without guesswork.
           </p>
         </CardContent>
       </Card>
@@ -101,6 +101,10 @@ export function AboutUs() {
               title="Continuous Improvement"
               description="Our models are regularly updated and refined based on new data and emerging spam patterns, ensuring we stay ahead of evolving threats."
             />
+            <TechSection
+              title="Observable Full Stack"
+              description="Telemetry is persisted in SQLite via the FastAPI service and visualised with Recharts on the dashboard, giving instant feedback loops for model health, traffic volume, and cluster behaviour."
+            />
           </div>
         </CardContent>
       </Card>
@@ -115,11 +119,11 @@ export function AboutUs() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            SpamGuard AI is built by a passionate team of machine learning engineers,
-            data scientists, and software developers committed to making digital
-            communication safer for everyone. We combine expertise in artificial
-            intelligence, cybersecurity, and user experience design to deliver a
-            world-class spam detection platform.
+            AI4Cyber is maintained by a cross-disciplinary student team that spans data science,
+            cybersecurity, and product engineering. We lean on open-source tooling—FastAPI, SQLite,
+            scikit-learn, and modern React components—to deliver a transparent spam defense workflow
+            that other innovators can extend. The work you see here is the direct continuation of
+            Assignment&nbsp;1 research and Assignment&nbsp;2 modelling efforts.
           </p>
         </CardContent>
       </Card>
