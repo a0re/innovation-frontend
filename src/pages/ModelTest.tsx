@@ -1,13 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Upload, Link as LinkIcon, Mail, Brain } from "lucide-react"
-import {
-  TextInputTab,
-  FileUploadTab,
-  URLInputTab,
-  EmailInputTab,
-  BatchInputTab,
-} from "@/components/model-test"
+import { FileText, Upload, Mail, Brain } from "lucide-react"
+import { TextInputTab, FileUploadTab, EmailInputTab } from "@/components/model-test/InputTabs"
+import { BatchInputTab } from "@/components/model-test/BatchInputTab"
 
 /**
  * ModelTest page - allows testing messages for spam detection
@@ -35,7 +30,7 @@ export function ModelTest() {
         </CardHeader>
         <CardContent className="pt-6">
           <Tabs defaultValue="text" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsList className="grid w-full grid-cols-4 mb-6">
               <TabsTrigger value="text" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Text</span>
@@ -43,10 +38,6 @@ export function ModelTest() {
               <TabsTrigger value="file" className="flex items-center gap-2">
                 <Upload className="h-4 w-4" />
                 <span className="hidden sm:inline">File</span>
-              </TabsTrigger>
-              <TabsTrigger value="url" className="flex items-center gap-2">
-                <LinkIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">URL</span>
               </TabsTrigger>
               <TabsTrigger value="email" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
@@ -66,11 +57,6 @@ export function ModelTest() {
             {/* File Upload Tab */}
             <TabsContent value="file" className="space-y-4">
               <FileUploadTab />
-            </TabsContent>
-
-            {/* URL Input Tab */}
-            <TabsContent value="url" className="space-y-4">
-              <URLInputTab />
             </TabsContent>
 
             {/* Email Input Tab */}

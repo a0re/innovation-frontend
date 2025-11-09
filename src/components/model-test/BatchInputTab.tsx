@@ -1,11 +1,11 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Loader2, Brain } from "lucide-react"
+import { Loader2, Brain, RotateCcw } from "lucide-react"
 import { api } from "@/lib/api-service"
 import { EXPORT_CONFIG, MESSAGES } from "@/constants"
-import type { BatchPredictionResponse } from "@/types"
+import type { BatchPrediction, BatchPredictionResponse } from "@/types"
 import { ErrorMessage } from "./ErrorMessage"
 import { BatchResultsDisplay } from "./BatchResultsDisplay"
 
@@ -18,41 +18,66 @@ export function BatchInputTab() {
   const [result, setResult] = useState<BatchPredictionResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const handleTest = async () => {
-    const parsedMessages = messages
-      .split("\n")
-      .map((m) => m.trim())
-      .filter((m) => m.length > 0)
+  const messageList = useMemo(
+    () =>
+      messages
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0),
+    [messages]
+  )
 
-    if (parsedMessages.length === 0) return
+  const messageCount = messageList.length
+
+  const handleTest = async () => {
+    if (messageCount === 0) {
+      setError("Please enter at least one message to analyze")
+      return
+    }
 
     setLoading(true)
     setResult(null)
     setError(null)
     try {
-      const data = await api.predictBatchMultiModel(parsedMessages)
+      const data = await api.predictBatch(messageList)
       setResult(data)
     } catch (err) {
+      setResult(null)
       setError(err instanceof Error ? err.message : MESSAGES.ERRORS.BATCH_PREDICTION_FAILED)
     } finally {
       setLoading(false)
     }
   }
 
+  const handleReset = () => {
+    setMessages("")
+    setResult(null)
+    setError(null)
+  }
+
   const handleExport = () => {
     if (!result) return
 
+    const toRow = (prediction: BatchPrediction) => {
+      const safeMessage = prediction.message.replace(/"/g, '""')
+      const numericConfidence = Number((prediction as unknown as { confidence: unknown }).confidence)
+      const isSpam = Boolean(prediction.is_spam || prediction.prediction === "spam")
+      const confidenceValue = Number.isFinite(numericConfidence)
+        ? `${(numericConfidence * 100).toFixed(1)}%`
+        : "Unknown"
+      const clusterLabel = prediction.cluster?.short_name || prediction.cluster?.name || ""
+      return [
+        `"${safeMessage}"`,
+        isSpam ? "SPAM" : "NOT SPAM",
+        confidenceValue,
+        clusterLabel,
+        prediction.timestamp,
+      ].join(",")
+    }
+
     const csvContent = [
       EXPORT_CONFIG.CSV_HEADERS.join(","),
-      ...result.predictions.map((pred) =>
-        [
-          `"${pred.message.replace(/"/g, '""')}"`,
-          pred.ensemble.is_spam ? "SPAM" : "NOT SPAM",
-          `${(pred.ensemble.confidence * 100).toFixed(1)}%`,
-          pred.ensemble.spam_votes,
-          pred.ensemble.total_votes,
-        ].join(",")
-      ),
+      ...result.predictions.map(toRow),
     ].join("\n")
 
     const blob = new Blob([csvContent], { type: "text/csv" })
@@ -63,8 +88,6 @@ export function BatchInputTab() {
     a.click()
     URL.revokeObjectURL(url)
   }
-
-  const messageCount = messages.split("\n").filter((m) => m.trim()).length
 
   return (
     <>
@@ -82,19 +105,25 @@ export function BatchInputTab() {
         />
         <p className="text-sm text-muted-foreground">{messageCount} messages</p>
       </div>
-      <Button onClick={handleTest} disabled={loading || messageCount === 0} size="lg" className="w-full">
-        {loading ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Testing {messageCount} Messages...
-          </>
-        ) : (
-          <>
-            <Brain className="mr-2 h-5 w-5" />
-            Analyze Batch
-          </>
-        )}
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={handleTest} disabled={loading || messageCount === 0} size="lg" className="flex-1">
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Testing {messageCount} {messageCount === 1 ? "Message" : "Messages"}...
+            </>
+          ) : (
+            <>
+              <Brain className="mr-2 h-5 w-5" />
+              Analyze Batch
+            </>
+          )}
+        </Button>
+        <Button variant="outline" onClick={handleReset} disabled={loading && !result}>
+          <RotateCcw className="mr-2 h-4 w-4" />
+          Reset
+        </Button>
+      </div>
       {error && <ErrorMessage message={error} />}
       {result && <BatchResultsDisplay result={result} onExport={handleExport} />}
     </>
