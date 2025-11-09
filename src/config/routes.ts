@@ -3,10 +3,12 @@
  * All routes are defined here for single source of truth
  */
 
+import { Home } from '@/pages/Home'
 import { Dashboard } from '@/pages/Dashboard'
 import { ModelTest } from '@/pages/ModelTest'
 import { AboutUs } from '@/pages/AboutUs'
 import { Documentation } from '@/pages/Documentation'
+import { Settings } from '@/pages/Settings'
 import { NotFound } from '@/pages/NotFound'
 
 export interface RouteConfig {
@@ -22,6 +24,12 @@ export interface RouteConfig {
 export const routes: RouteConfig[] = [
   {
     path: '/',
+    label: 'Home',
+    element: Home,
+    showInNav: false,
+  },
+  {
+    path: '/dashboard',
     label: 'Dashboard',
     element: Dashboard,
     showInNav: true,
@@ -45,6 +53,12 @@ export const routes: RouteConfig[] = [
     showInNav: true,
   },
   {
+    path: '/settings',
+    label: 'Settings',
+    element: Settings,
+    showInNav: true,
+  },
+  {
     path: '*',
     label: 'Not Found',
     element: NotFound,
@@ -62,9 +76,10 @@ export const navItems = routes.filter((route) => route.showInNav)
  */
 export const ROUTE_PATHS = {
   HOME: '/',
-  DASHBOARD: '/',
+  DASHBOARD: '/dashboard',
   MODEL_TEST: '/model-test',
   ABOUT: '/about',
   DOCUMENTATION: '/documentation',
+  SETTINGS: '/settings',
 } as const
 

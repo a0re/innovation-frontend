@@ -1,15 +1,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { PageHeader } from "@/components/common"
+import { PageHeader } from "@/components/common/PageHeader"
 import {
+  Activity,
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
   BookOpen,
+  CalendarDays,
   Code,
   Database,
   Layers,
+  ListChecks,
   Settings,
+  Target,
   Zap,
-  ArrowRight,
-  AlertCircle,
 } from "lucide-react"
 
 /**
@@ -20,7 +25,7 @@ export function Documentation() {
     <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
       <PageHeader
         title="Documentation"
-        description="Complete guide to using SpamGuard AI"
+  description="Complete guide to using AI4Cyber"
       />
 
       {/* Quick Start */}
@@ -30,20 +35,59 @@ export function Documentation() {
             <Zap className="h-5 w-5" />
             Quick Start
           </CardTitle>
-          <CardDescription>Get started with SpamGuard AI in minutes</CardDescription>
+          <CardDescription>Get started with AI4Cyber in minutes</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <StepItem step={1} title="Navigate to Model Test" description="Go to the Model Test page from the navigation menu to start testing messages." />
+            <StepItem
+              step={1}
+              title="Open Model Test"
+              description="Navigate to the Model Test page and choose the input type (text, file, email, or batch)."
+            />
             <StepItem
               step={2}
-              title="Enter Your Message"
-              description="Type or paste the message you want to analyze in the text area."
+              title="Provide Your Content"
+              description="Type a message, upload a .txt/.csv file, or compose an email for the models to analyze."
             />
             <StepItem
               step={3}
-              title="Get Results"
-              description='Click "Analyze Message" to receive instant spam detection results with confidence scores.'
+              title="Review Results"
+              description="Run the analysis to review the ensemble verdict, per-model votes, optional spam explanations, and see the results reflected in the dashboard analytics."
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Dashboard Insights */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Dashboard Insights
+          </CardTitle>
+          <CardDescription>Use the analytics workspace to stay ahead of spam trends</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <DashboardInsightItem
+              icon={<Activity className="h-5 w-5 text-primary" />}
+              title="Request Stream"
+              description="Track live prediction volume, spam share, and confidence patterns across hour, day, week, or month windows."
+            />
+            <DashboardInsightItem
+              icon={<CalendarDays className="h-5 w-5 text-primary" />}
+              title="Year-to-Date Spam Heatmap"
+              description="Explore day-by-day spam intensity for the current year, with optional filters per spam cluster."
+            />
+            <DashboardInsightItem
+              icon={<Target className="h-5 w-5 text-primary" />}
+              title="Cluster Explorer"
+              description="Dive into spam clusters, their top terms, and distribution to surface emerging scam narratives."
+            />
+            <DashboardInsightItem
+              icon={<ListChecks className="h-5 w-5 text-primary" />}
+              title="Recent Predictions"
+              description="Audit the latest predictions with ensemble verdicts, raw text, and user feedback in one place."
             />
           </div>
         </CardContent>
@@ -61,50 +105,107 @@ export function Documentation() {
         <CardContent>
           <div className="space-y-6">
             <APIEndpoint
+              method="GET"
+              endpoint="/health"
+              description="Verify that the backend service and models are ready."
+            />
+            <APIEndpoint
               method="POST"
-              endpoint="/api/predict"
-              description="Submit a message for spam detection analysis."
+              endpoint="/predict/multi-model"
+              description="Submit a single message and receive ensemble plus per-model predictions."
               request={`{
-  "message": "Your message text here"
+  "message": "Congratulations! You've won a prize."
 }`}
               response={`{
-  "is_spam": true,
-  "confidence": 0.95,
-  "spam_type": 2,
-  "cluster_id": 1,
-  "top_terms": ["free", "click", "win"]
+  "message": "Congratulations! You've won a prize.",
+  "processed_message": "congratulations youve won a prize",
+  "multinomial_nb": {
+    "prediction": "spam",
+    "confidence": 0.94,
+    "is_spam": true
+  },
+  "logistic_regression": {
+    "prediction": "spam",
+    "confidence": 0.91,
+    "is_spam": true
+  },
+  "linear_svc": {
+    "prediction": "spam",
+    "confidence": 0.92,
+    "is_spam": true
+  },
+  "ensemble": {
+    "prediction": "spam",
+    "confidence": 0.92,
+    "is_spam": true,
+    "spam_votes": 3,
+    "total_votes": 3
+  },
+  "cluster": {
+    "cluster_id": 4,
+    "name": "Prize & Lottery Spam",
+    "short_name": "Lottery",
+    "description": "Promises of winnings that require an action to claim",
+    "icon": "🎉",
+    "color": "#f97316",
+    "confidence": 0.63,
+    "total_clusters": 8,
+    "top_terms": [
+      { "term": "prize" },
+      { "term": "click" },
+      { "term": "winner" }
+    ]
+  },
+  "timestamp": "2025-11-08T16:42:11Z"
+}`}
+            />
+            <APIEndpoint
+              method="POST"
+              endpoint="/predict/batch"
+              description="Send multiple messages at once. The response aggregates spam counts and individual predictions."
+              request={`{
+  "messages": [
+    "Urgent: Verify your account",
+    "Let's grab lunch tomorrow"
+  ]
 }`}
             />
             <APIEndpoint
               method="GET"
-              endpoint="/api/stats"
+              endpoint="/stats"
               description="Retrieve overall statistics about predictions."
               response={`{
   "total_predictions": 1234,
-  "spam_detected": 456,
-  "not_spam_detected": 778,
-  "average_confidence": 0.89
+  "spam_count": 456,
+  "ham_count": 778,
+  "spam_rate": 0.369,
+  "avg_confidence": 0.89
 }`}
             />
             <APIEndpoint
               method="GET"
-              endpoint="/api/cluster-info"
-              description="Get information about message clusters and patterns."
-              response={`{
-  "total_clusters": 8,
-  "silhouette_score": 0.342,
-  "clusters": [...]
-}`}
+              endpoint="/predictions/recent?limit=100"
+              description="List the most recent predictions, useful for audit trails and examples."
             />
             <APIEndpoint
               method="GET"
-              endpoint="/api/examples"
-              description="Fetch example messages for spam and non-spam categories."
+              endpoint="/trends?period=month&limit=12"
+              description="Fetch aggregated trend data for dashboards and reporting."
             />
             <APIEndpoint
               method="GET"
-              endpoint="/api/historical-predictions"
-              description="Retrieve historical prediction data for trend analysis."
+              endpoint="/analytics/clusters"
+              description="Return spam volume grouped by AI4Cyber cluster labels to feed the distribution chart."
+            />
+            <APIEndpoint
+              method="GET"
+              endpoint="/cluster/info"
+              description="Surface cluster metadata, top terms, and descriptive text for explainability tooling."
+            />
+            <APIEndpoint
+              method="DELETE"
+              endpoint="/predictions"
+              description="Remove stored prediction records when you need a fresh start."
             />
           </div>
         </CardContent>
@@ -203,21 +304,25 @@ export function Documentation() {
                   <Badge variant="outline" className="border-emerald-500 text-emerald-600">
                     NOT SPAM
                   </Badge>
-                  . This is determined by the majority vote of the three ensemble models.
+                  . The ensemble verdict respects your configured confidence threshold from the Settings page.
                 </>
               }
             />
             <ResultExplanation
               title="Confidence Score"
-              description="The confidence score (0-100%) indicates how certain the model is about its prediction. Higher scores mean greater confidence. Scores above 80% indicate high confidence."
+              description="Confidence values are returned for every model and the ensemble. Scores above 80% indicate high confidence; anything below your threshold will surface a caution badge."
             />
             <ResultExplanation
               title="Spam Type"
-              description="For spam messages, the model assigns a spam type (0-7) based on clustering analysis, which helps categorize different kinds of spam patterns."
+              description="For spam messages, AI4Cyber returns enriched cluster metadata (name, emoji, description) based on our eight k-means clusters so you can understand which pattern triggered the alert."
             />
             <ResultExplanation
               title="Top Terms"
               description="The most influential words from the cluster that contributed to the classification, helping you understand why a message was flagged."
+            />
+            <ResultExplanation
+              title="Spam Indicators"
+              description="When Spam Explanation is enabled in Settings, highlighted keywords, URLs, and formatting signals show what triggered the spam decision—ideal for explainability and user education."
             />
           </div>
         </CardContent>
@@ -251,6 +356,33 @@ export function Documentation() {
         </CardContent>
       </Card>
 
+      {/* Settings */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Settings & Controls
+          </CardTitle>
+          <CardDescription>Customize how predictions are made and displayed</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <BestPracticeItem
+              title="Adjust Confidence Threshold"
+              description="Choose how strict the ensemble should be before marking content as spam."
+            />
+            <BestPracticeItem
+              title="Toggle Individual Models"
+              description="Enable or disable Multinomial NB, Logistic Regression, and Linear SVC depending on your needs."
+            />
+            <BestPracticeItem
+              title="Optimize Display"
+              description="Control confidence bars, spam explanations, and cluster info to match your workflow."
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* FAQ */}
       <Card>
         <CardHeader>
@@ -263,7 +395,7 @@ export function Documentation() {
           <div className="space-y-4">
             <FAQItem
               question="How accurate is the spam detection?"
-              answer="Our ensemble model achieves high accuracy through the combination of three different machine learning algorithms. The exact accuracy varies based on message types, but typically exceeds 95% on standard spam detection benchmarks."
+              answer="Our ensemble model combines three complementary learners and scores around 94% macro accuracy on the curated SMS/email corpus used in Assignment&nbsp;2. Real-world performance varies with content and continues to improve as we retrain."
             />
             <FAQItem
               question="What languages are supported?"
@@ -271,7 +403,7 @@ export function Documentation() {
             />
             <FAQItem
               question="Is my data stored?"
-              answer="Predictions are stored anonymously for analytics and model improvement purposes. No personally identifiable information is retained."
+              answer="Prediction requests (including message text, processed tokens, and cluster IDs) are stored in a local SQLite database so the dashboard can show stats and trends. Use Settings → Danger Zone → Delete All Predictions to wipe the data at any time."
             />
             <FAQItem
               question="Can I integrate this with my application?"
@@ -417,6 +549,28 @@ function BestPracticeItem({ title, description }: { title: string; description: 
   return (
     <div className="flex gap-3">
       <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+      <div>
+        <h4 className="font-medium mb-1">{title}</h4>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+    </div>
+  )
+}
+
+function DashboardInsightItem({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+}) {
+  return (
+    <div className="flex gap-3 rounded-md border p-4">
+      <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+        {icon}
+      </div>
       <div>
         <h4 className="font-medium mb-1">{title}</h4>
         <p className="text-sm text-muted-foreground">{description}</p>
