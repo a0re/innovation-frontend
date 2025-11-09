@@ -9,11 +9,14 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:80
 export const API_ENDPOINTS = {
   HEALTH: "/health",
   STATS: "/stats",
+  PREDICT: "/predict",
   PREDICT_MULTI_MODEL: "/predict/multi-model",
-  PREDICT_BATCH: "/predict/multi-model/batch",
+  PREDICT_BATCH: "/predict/batch",
+  PREDICTIONS_RECENT: "/predictions/recent",
+  PREDICTIONS_DELETE: "/predictions",
+  TRENDS: "/trends",
+  ANALYTICS_CLUSTERS: "/analytics/clusters",
   CLUSTER_INFO: "/cluster/info",
-  EXAMPLES: "/examples",
-  PREDICTIONS_HISTORY: "/predictions/history",
 } as const
 
 // Request Configuration
@@ -68,7 +71,7 @@ export const CLUSTER_CONFIG = {
 // Data Export Configuration
 export const EXPORT_CONFIG = {
   BATCH_RESULTS_FILENAME: "spam_detection_results.csv",
-  CSV_HEADERS: ["Message", "Prediction", "Confidence", "Spam Votes", "Total Votes"],
+  CSV_HEADERS: ["Message", "Prediction", "Confidence", "Cluster", "Timestamp"],
 } as const
 
 // Visualization

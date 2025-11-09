@@ -11,6 +11,11 @@ export interface PredictionResult {
 
 export interface ClusterInfo {
   cluster_id: number
+  name: string
+  short_name: string
+  description: string
+  icon: string
+  color: string
   confidence: number
   total_clusters: number
   top_terms: Array<{
@@ -26,6 +31,11 @@ export interface TopTerm {
 
 export interface ClusterDetails {
   cluster_id: number
+  name: string
+  short_name: string
+  description: string
+  icon: string
+  color: string
   num_terms: number
   top_terms: TopTerm[]
 }
@@ -44,18 +54,105 @@ export interface MultiModelPrediction {
   timestamp: string
 }
 
+export interface BatchPrediction {
+  message: string
+  prediction: string
+  confidence: number | null
+  is_spam: boolean
+  processed_message: string
+  timestamp: string
+  cluster: ClusterInfo | null
+}
+
 export interface BatchPredictionResponse {
-  predictions: MultiModelPrediction[]
-  total_processed: number
-  spam_count: number
-  not_spam_count: number
+  predictions: BatchPrediction[]
+  total: number
+  spam: number
+  ham: number
+  spam_rate: number
 }
 
 export interface StatsResponse {
   total_predictions: number
-  spam_detected: number
-  not_spam_detected: number
-  average_confidence: number
+  spam_count: number
+  ham_count: number
+  spam_rate: number
+  avg_confidence: number
+  top_clusters?: Array<{
+    cluster_id: number
+    count: number
+  }>
+}
+
+export interface TrendClusterBreakdown {
+  cluster_id: number
+  count: number
+}
+
+export interface TrendPoint {
+  period: string
+  total: number
+  spam_count: number
+  ham_count: number
+  spam_rate: number
+  avg_confidence: number
+  clusters?: TrendClusterBreakdown[]
+}
+
+export interface TrendResponse {
+  period: string
+  data: TrendPoint[]
+}
+
+export interface ClusterDistributionItem {
+  cluster_id: number
+  name: string
+  short_name: string
+  icon: string
+  color: string
+  count: number
+}
+
+export interface ClusterDistributionResponse {
+  total_spam_with_clusters: number
+  clusters: ClusterDistributionItem[]
+}
+
+export interface ConfidenceBucket {
+  bucket: string
+  start: number
+  end: number
+  spam: number
+  ham: number
+  total: number
+}
+
+export interface ConfidenceDistributionSummary {
+  total_predictions: number
+  spam_mean_confidence: number
+  ham_mean_confidence: number
+  overall_mean_confidence: number
+}
+
+export interface ConfidenceDistributionResponse {
+  buckets: ConfidenceBucket[]
+  summary: ConfidenceDistributionSummary
+}
+
+export interface RecentPrediction {
+  id?: number
+  message: string
+  prediction: string
+  confidence: number
+  is_spam: boolean
+  cluster_id: number | null
+  timestamp: string
+  user_feedback?: string | null
+}
+
+export interface RecentPredictionsResponse {
+  predictions: RecentPrediction[]
+  count: number
 }
 
 export interface ClusterInfoResponse {
@@ -66,14 +163,12 @@ export interface ClusterInfoResponse {
 }
 
 export interface HealthResponse {
-  status: string
-  model_loaded: boolean
+  status: string | null
+  model: string | null
+  models: string[]
+  clusterer: boolean
+  version: string
   timestamp: string
-}
-
-export interface HistoricalPredictionsResponse {
-  predictions: MultiModelPrediction[]
-  total_count: number
 }
 
 // UI Component Types
